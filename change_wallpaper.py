@@ -3,13 +3,14 @@
 import requests
 import os
 import pwd
+import fnmatch
 
 # Read API key from keys file
 keyFile = open('keys.txt', 'r')
 key = keyFile.readline().rstrip()
 
 # Add your key from keys file to the API url
-url = "https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY"
+url = "https://api.nasa.gov/planetary/apod?api_key="+key
 
 # Set wallpaper directory to store image
 global directory
@@ -18,13 +19,15 @@ directory = '/Users/'+username+'/Pictures/Wallpapers/'
 
 # Request APOD and write image to Wallpapers directory
 req = requests.get(url)
-print(url)
 if req:
     APOD = req.json()['url']
     pic = requests.get(APOD, allow_redirects=True)
     if 'jpg' not in APOD:
-        print('No image')
+        print('Connected to API -- No image today')
     else:
-        open(directory+'pod.jpg', 'wb').write(pic.content)
+        count = len(fnmatch.filter(os.listdir(directory), 'apod*'))
+        file_name = "apod" + str(count+1) + ".jpg"
+        open(directory+file_name, 'wb').write(pic.content)
+        print('Image in Wallpapers 🤟')
 else:
-    print('Error getting Image')
+    print('Error Connecting to API 👎')
